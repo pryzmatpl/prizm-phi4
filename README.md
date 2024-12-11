@@ -1,5 +1,5 @@
 ---
-license: other
+license: mit
 license_link: https://huggingface.co/microsoft/phi-4/resolve/main/LICENSE
 language:
 - en
@@ -39,7 +39,7 @@ library_name: transformers
 | **Dates**               | October 2024 – November 2024                                                  |
 | **Status**              | Static model trained on an offline dataset with cutoff dates of June 2024 and earlier for publicly available data                                                                               |
 | **Release date**        | December 12, 2024                                                             |
-| **License**             | MSRLA                                                                         |
+| **License**             | MIT                                                                         |
 
 ## Intended Use 
 

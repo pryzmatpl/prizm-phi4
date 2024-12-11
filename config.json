@@ -1,5 +1,5 @@
 {
-  "_name_or_path": "phi-4",
+  "_name_or_path": "microsoft/phi-4",
   "architectures": [
     "Phi3ForCausalLM"
   ],
