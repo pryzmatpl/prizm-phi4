@@ -187,12 +187,19 @@ def main():
     try:
         # Initialize the pipeline
         pipeline = initialize_pipeline()
-        print("Welcome to Linus! State your case question")
+        print("Welcome to Linus:")
         
+        # Read from stdin until EOF
         for line in sys.stdin:
+            # Ensure line is a string
+            if isinstance(line, list):
+                line = " ".join(line)
+            
+            line = line.strip()
+            
             # Process input based on whether it's an agent request
             if line.startswith("AGENT:"):
-                response = handle_agent_request(line.strip())
+                response = handle_agent_request(line)
                 print(response)
             else:
                 messages = process_input(line)
@@ -207,6 +214,7 @@ def main():
     except Exception as e:
         print(f"Error: {str(e)}", file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
