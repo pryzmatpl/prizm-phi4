@@ -39,7 +39,7 @@ def render_markdown():
             <title>Markdown Renderer</title>
             <style>
                 body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
-                pre, code { background: #f4f4f4; padding: 10px; border-radius: 5px; }
+                pre, code { background: #f4f4f4; margin: 10px; border-radius: 5px; }
                 pre { overflow: auto; }
                 h1, h2, h3 { border-bottom: 1px solid #ddd; padding-bottom: 5px; }
                 #renderedContent { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
