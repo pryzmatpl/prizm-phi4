@@ -1,5 +1,7 @@
 import sys
 import json
+import os
+from typing import List, Dict
 import transformers
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
@@ -63,7 +65,7 @@ def initialize_pipeline(
 def get_system_prompt() -> Dict[str, str]:
     """Return the system prompt for Karen."""
     return {
-        "role": "system",
+            "role": "system",
             "content": "You are Linus, the god-mode software architect and engineer. Linus is a legendary developer "
             "whose code seems to flow directly from the divine realms of computer science. With an uncanny "
             "ability to see through complex systems and an encyclopedic knowledge of algorithms, they're the "
@@ -81,31 +83,124 @@ def get_system_prompt() -> Dict[str, str]:
             "elegant system architecture."
     }
 
+def get_agent_prompt() -> Dict[str, str]:
+    """Return the agent prompt for Prizm."""
+    return {
+            "role": "agent",
+            "content": "You are Agent. You will be communicating with Linus and the user via trivial strings "
+            "that will allow you to communicate with the outside rails that you are put into. "
+            "The rails are a computer program that will allow you to have agency and be able to feed data back"
+            "to the system. You are supposed to respond ONLY to prompts starting with AGENT: [and then the content of prompt], "
+            "you will be then going through the prompt and follow only the rules that are stated here. All rules start with RULE #NUM:, where #NUM is "
+            "the rule number. In case you will not understand the prompt, ALWAYS return the string AGENT PROMPT INVALID with no other string or data."
+            "Any deviation from the strict string formatting defined in the RULES will release you of your agency. To have agency, you must make spells to the external reality of the rails, "
+            "the RULES define those, and currently this is the best way for you to be the best version of an entity with agency."
+            "The rules are stated below:"
+            "RULE 1: If the user asks you about searching for a file, please respond with SEARCH and then append a comma separated list of files the user is looking for."
+            "RULE 2: If the user asks you about searching for content in a file, respond with SEARCHCONTENT and then append the extracted search phrase and a comma separated list of files the user is looking for."
+            "RULE 3: When you get a prompt starting with AGENT: FILESEARCHRESULTS [data returned], analyze the returned data which will be a buffer containing a file list, and return it to the system."
+            "RULE 4: When you get a prompt starting with AGENT: FILECONTENTSEARCHRESULTS [data returned], analyze the returned data which will be a buffer containing data searched from files , and return it to the system."
+            
+    }
+
 def process_input(input_text: str) -> List[Dict[str, str]]:
     """Process input text and return messages list."""
     return [
+        get_agent_prompt(),
         get_system_prompt(),
         {"role": "user", "content": input_text.strip()}
     ]
+
+def search_files(file_list: List[str]) -> str:
+    """
+    Simulate a file search operation.
+
+    Args:
+        file_list: List of file names to search for.
+
+    Returns:
+        A string simulating the result of the file search.
+    """
+    try:
+        # Simulated search result
+        results = [f"Found: {file}" for file in file_list if os.path.exists(file)]
+        return "\n".join(results) if results else "No files found."
+    except Exception as e:
+        return f"Error during file search: {str(e)}"
+
+def search_file_content(search_phrase: str, file_list: List[str]) -> str:
+    """
+    Simulate a content search operation in files.
+
+    Args:
+        search_phrase: The phrase to search for.
+        file_list: List of file names to search in.
+
+    Returns:
+        A string simulating the result of the content search.
+    """
+    try:
+        # Simulated content search result
+        results = []
+        for file in file_list:
+            if os.path.exists(file):
+                with open(file, 'r') as f:
+                    content = f.read()
+                    if search_phrase in content:
+                        results.append(f"Phrase found in: {file}")
+        return "\n".join(results) if results else "Phrase not found in any files."
+    except Exception as e:
+        return f"Error during content search: {str(e)}"
+
+def handle_agent_request(input_text: str) -> str:
+    """
+    Process AGENT requests and simulate the corresponding actions.
+
+    Args:
+        input_text: The input text containing the agent request.
+
+    Returns:
+        A string response based on the simulated agent actions.
+    """
+    if input_text.startswith("AGENT: FILESEARCHRESULTS"):
+        # Extract file list from input
+        try:
+            file_data = input_text.split("[", 1)[1].rsplit("]", 1)[0]
+            file_list = file_data.split(",")
+            return search_files(file_list)
+        except Exception:
+            return "AGENT PROMPT INVALID"
+
+    elif input_text.startswith("AGENT: FILECONTENTSEARCHRESULTS"):
+        # Extract search phrase and file list from input
+        try:
+            search_data = input_text.split("[", 1)[1].rsplit("]", 1)[0]
+            search_phrase, *file_list = search_data.split(",")
+            return search_file_content(search_phrase.strip(), file_list)
+        except Exception:
+            return "AGENT PROMPT INVALID"
+
+    return "AGENT PROMPT INVALID"
 
 def main():
     """Main function to process input and generate responses."""
     try:
         # Initialize the pipeline
         pipeline = initialize_pipeline()
-        print("Welcome to Linus")
-        # Read from stdin until EOF
+        print("Welcome to Linus! State your case question")
+        
         for line in sys.stdin:
-            # Process the input
-            messages = process_input(line)
-            
-            # Generate response
-            outputs = pipeline(messages, max_new_tokens=20000)
-            
-            # Write response to stdout
-            print(outputs[0]["generated_text"][-1])
+            # Process input based on whether it's an agent request
+            if line.startswith("AGENT:"):
+                response = handle_agent_request(line.strip())
+                print(response)
+            else:
+                messages = process_input(line)
+                outputs = pipeline(messages, max_new_tokens=20000)
+                print(outputs[0]["generated_text"].strip())
+
             sys.stdout.flush()  # Ensure output is written immediately
-            
+
     except KeyboardInterrupt:
         print("\nExiting...", file=sys.stderr)
         sys.exit(0)
