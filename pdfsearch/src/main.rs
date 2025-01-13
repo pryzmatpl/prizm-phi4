@@ -38,15 +38,15 @@ fn main() {
     }
 }
 
-fn process_file(file_path: &str, search_words: &[String]) {
+fn process_file(file_path: &str, search_words: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     // Load the PDF document
-    let pdf = Document::load(file_path).unwrap_or_else(|err| {
+    let pdf = Document::load(file_path).map_err(|err| {
         eprintln!("Failed to load PDF file '{}': {}", file_path, err);
-        return;
-    });
+        err
+    })?;
 
     // Iterate through the pages and search for words
-    for (page_number, page_id) in pdf.get_pages() {
+    for (page_number, (page_id, _)) in pdf.get_pages() {
         if let Ok(page_content) = pdf.extract_text(&[page_id]) {
             for word in search_words {
                 if page_content.contains(word) {
@@ -55,4 +55,6 @@ fn process_file(file_path: &str, search_words: &[String]) {
             }
         }
     }
+    Ok(())
 }
+
