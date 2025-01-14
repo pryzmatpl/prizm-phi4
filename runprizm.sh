@@ -8,5 +8,5 @@ docker run -it \
   --ipc=host \
   --shm-size 32G \
   -v "$(pwd)":/app \
-  prizm/rocm:1
+  rocm/pytorch:rocm6.1.3_ubuntu22.04_py3.10_pytorch_release-2.1.2
   

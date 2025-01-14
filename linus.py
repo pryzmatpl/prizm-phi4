@@ -176,6 +176,7 @@ def handle_agent_request(input_text: str) -> str:
         try:
             search_data = input_text.split("[", 1)[1].rsplit("]", 1)[0]
             search_phrase, *file_list = search_data.split(",")
+            print("phrase:" + search_phrase)
             return search_file_content(search_phrase.strip(), file_list)
         except Exception:
             return "AGENT PROMPT INVALID"
@@ -194,7 +195,7 @@ def main():
             # Ensure line is a string
             if isinstance(line, list):
                 line = " ".join(line)
-            
+                        
             line = line.strip()
             
             # Process input based on whether it's an agent request
@@ -204,7 +205,12 @@ def main():
             else:
                 messages = process_input(line)
                 outputs = pipeline(messages, max_new_tokens=20000)
-                print(outputs[0]["generated_text"].strip())
+                
+                outp = outputs[0]["generated_text"]
+                if isinstance(outp, list):
+                    outp = " ".join(outp)
+                
+                print(outp.strip())
 
             sys.stdout.flush()  # Ensure output is written immediately
 
