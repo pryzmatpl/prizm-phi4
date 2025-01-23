@@ -2,4 +2,5 @@ venv
 venv312
 target/*
 pdfsearch/target
-__pychache__
+__pychache__/*
+*target*
