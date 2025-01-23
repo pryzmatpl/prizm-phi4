@@ -12,7 +12,7 @@ def main():
 
     try:
         # Initialize the pipeline
-        pipeline = _pipeline.initialize_pipeline()
+        pipeline = _pipeline.initialize_pipeline(model_path="./models/phi4")
         agents = sys.argv[1:]
         print("Welcome to ", agents)
         
@@ -30,13 +30,7 @@ def main():
             else:
                 messages = _interface.prepare_model_input(line, agents)
                 outputs = pipeline(messages, max_new_tokens=20000)
-                
-                outp = outputs[0]["generated_text"]
-
-                if isinstance(outp, list):
-                    outp = " ".join(outp)
-                
-                print(outp.strip())
+                print(outputs)
 
             sys.stdout.flush()  # Ensure output is written immediately
 
