@@ -44,7 +44,7 @@ def main():
                 messages = _interface.prepare_model_input(line, agents)
                 outputs = pipeline(messages, max_new_tokens=20000)
                 if isinstance(outputs, list) and len(outputs) > 0:
-                    print(outputs[0]["generated_text"].strip())
+                    print(outputs)
                 else:
                     print("No response generated.")
 
