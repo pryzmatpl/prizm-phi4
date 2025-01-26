@@ -4,43 +4,38 @@ from typing import List
 
 
 class AgentTools:
-    def search_files(file_list: List[str]) -> str:
+    @classmethod
+    def search_files(cls, file_list: List[str]) -> str:
         """
         Simulate a file search operation.
-
-        Args:
-            file_list: List of file names to search for.
-
-        Returns:
-            A string simulating the result of the file search.
         """
-        try:
-            # Simulated search result
-            results = [f"Found: {file}" for file in file_list if os.path.exists(file)]
-            return "\n".join(results) if results else "No files found."
-        except Exception as e:
-            return f"Error during file search: {str(e)}"
+        results = []
+        for file in file_list:
+            file_path = os.path.normpath(file.strip())
+            if os.path.exists(file_path):
+                results.append(f"Found: {file_path}")
+            else:
+                results.append(f"Not found: {file_path}")
+        return "\n".join(results)
 
-    def search_file_content(search_phrase: str, file_list: List[str]) -> str:
+    @classmethod
+    def search_file_content(cls, search_phrase: str, file_list: List[str]) -> str:
         """
         Simulate a content search operation in files.
-
-        Args:
-            search_phrase: The phrase to search for.
-            file_list: List of file names to search in.
-
-        Returns:
-            A string simulating the result of the content search.
         """
-        try:
-            # Simulated content search result
-            results = []
-            for file in file_list:
-                if os.path.exists(file):
-                    with open(file, 'r') as f:
+        results = []
+        for file in file_list:
+            file_path = os.path.normpath(file.strip())
+            if os.path.exists(file_path):
+                try:
+                    with open(file_path, "r", encoding="utf-8") as f:
                         content = f.read()
                         if search_phrase in content:
-                            results.append(f"Phrase found in: {file}")
-            return "\n".join(results) if results else "Phrase not found in any files."
-        except Exception as e:
-            return f"Error during content search: {str(e)}"
+                            results.append(f"Phrase found in: {file_path}")
+                        else:
+                            results.append(f"Phrase not found in: {file_path}")
+                except Exception as e:
+                    results.append(f"Error reading {file_path}: {str(e)}")
+            else:
+                results.append(f"File not found: {file_path}")
+        return "\n".join(results)
