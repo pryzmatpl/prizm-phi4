@@ -43,6 +43,7 @@ def main():
     First agent is the main one.
     """
     logging.basicConfig(level=logging.INFO)
+    os.environ['PYTORCH_HIP_ALLOC_CONF'] = 'max_split_size_mb:512'  # Prevent fragmentation
 
     # Parse arguments
     args = parse_arguments()
