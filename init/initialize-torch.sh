@@ -12,7 +12,7 @@ docker run -it \
   bash -c "
     cd /app &&
     source ./venv312/bin/activate &&
-    pip install transformers accelerate &&
+    pip install transformers accelerate bitsandbytes &&
     export TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1 &&
     python main.py $*
   "

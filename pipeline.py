@@ -1,5 +1,5 @@
 import transformers
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import torch
 import sys
 
@@ -7,7 +7,7 @@ class Pipeline:
     @staticmethod
     def initialize_pipeline(
         model_path: str = "./",
-        load_in_8bit: bool = False,
+        load_in_8bit: bool = True,
         device_map: str = "auto",
     ) -> transformers.Pipeline:
         """
@@ -17,7 +17,9 @@ class Pipeline:
             print(f'Device name [0]: {torch.cuda.get_device_name(0)}', file=sys.stderr)
 
             tokenizer = AutoTokenizer.from_pretrained(
-                model_path, trust_remote_code=True, local_files_only=True
+                model_path,
+                trust_remote_code=True,
+                local_files_only=True
             )
 
             model_kwargs = {
@@ -26,13 +28,16 @@ class Pipeline:
                 "trust_remote_code": True,
                 "local_files_only": True,
             }
-            if load_in_8bit:
-                model_kwargs["load_in_8bit"] = True
 
+            config = BitsAndBytesConfig(load_in_8bit=load_in_8bit)
             model = AutoModelForCausalLM.from_pretrained(model_path, **model_kwargs)
 
             pipeline = transformers.pipeline(
-                "text-generation", model=model, tokenizer=tokenizer, device_map=device_map
+                "text-generation",
+                model=model,
+                tokenizer=tokenizer,
+                device_map=device_map,
+                config=config
             )
 
             print(f"Successfully loaded model from {model_path}", file=sys.stderr)

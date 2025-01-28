@@ -1,9 +1,10 @@
 
 import os
-from typing import List
+from typing import List, Dict
 
 
 class AgentTools:
+
     @classmethod
     def search_files(cls, file_list: List[str]) -> str:
         """

@@ -1,62 +1,107 @@
+import argparse
+import os
 import sys
 import logging
+
+from transformers import BitsAndBytesConfig
+
 from pipeline import Pipeline
+from pipeline_processor import PipelineProcessor
 from agent import Agent
 from interface import Interface
+
+def parse_arguments() -> argparse.Namespace:
+    """Parse command line arguments with support for positional agent names."""
+    parser = argparse.ArgumentParser(
+        description="Launch an ensemble of agents and the supervisor."
+    )
+
+    # Make source_model optional with a default value
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="phi4",
+        help="Source model path (default: phi4)"
+    )
+
+    # Add agents as remaining arguments
+    parser.add_argument(
+        "agents",
+        nargs="*",  # Allow any number of agent names
+        help="Names of agents to initialize"
+    )
+
+    # Parse known args to handle both script-style and direct launches
+    args, unknown = parser.parse_known_args()
+
+    # If there are unknown args, they might be agent names from script-style launch
+    if unknown:
+        args.agents.extend(unknown)
+
+    return args
 
 def main():
     """
     Main function to process input and generate responses.
-    First agent is the main one
+    First agent is the main one.
     """
     logging.basicConfig(level=logging.INFO)
 
+    # Parse arguments
+    args = parse_arguments()
+
+    # Check model path
+    model_path = "./models/"+args.model
+    if not os.path.exists(model_path):
+        print(f"Error: Source model directory {model_path} does not exist.")
+        sys.exit(1)
+
+    # Get agent list (either from script or direct arguments)
+    agents_list = args.agents
+
+    if not agents_list:
+        print("Error: No agents specified")
+        sys.exit(1)
+
+    # Initialize basic components
     _pipeline = Pipeline()
     _interface = Interface()
 
-    agents_list = sys.argv[1:]
-    agents = []
-
-    for agent in agents_list:
-        agents.append({"name":agent, "agent":Agent(agent)})
-
-    count = 0
-    for agent_dict in agents:
-        other_agents = agents[:count] + agents[count+1:]
-        for other_agent in other_agents:
-            agent_dict["agent"].register_agent(other_agent["name"], other_agent["agent"])    
+    # Initialize agents
+    agents = Agent.initialize_agents(args.agents)
 
     try:
-        pipeline = _pipeline.initialize_pipeline(model_path="./models/phi4")
-        print("Agents " + ''.join(agents_list) + " initialized. Awaiting input...")
+        # Initialize the transformer pipeline
+        base_pipeline = Pipeline.initialize_pipeline(
+            model_path=model_path
+        )
 
-        for line in sys.stdin:
-            line = line.strip()
-            if not line:
-                continue
+        # Create pipeline processor with custom parameters
+        processor = PipelineProcessor(
+            pipeline=base_pipeline,
+            max_length=20480,
+            temperature=0.7,
+            top_p=0.9,
+            top_k=50
+        )
 
-            # Handle agent-specific requests
-            if line.startswith("AGENT:"):
-                for responding_agent in agents[1:]:
-                    response = responding_agent["agent"].handle_agent_request(line)
-                    print(response.strip())
-            else:
-                messages = _interface.prepare_model_input(line, agents)
-                outputs = pipeline(messages, max_new_tokens=20000)
-                if isinstance(outputs, list) and len(outputs) > 0:
-                    print(outputs)
-                else:
-                    print("No response generated.")
+        print(f"Agents {' '.join(agents_list)} initialized. Awaiting input...")
 
-            sys.stdout.flush()
+        supervisor = agents_list[0]
+
+        Interface.process_supervisor_loop(
+            processor,
+            supervisor,
+            agents
+        )
 
     except KeyboardInterrupt:
-        print("Exiting...")
+        print("\nExiting...")
         sys.exit(0)
     except Exception as e:
-        print(f"Error: {str(e)}")
+        logging.error(f"Fatal error: {str(e)}")
+        print(f"Fatal error: {str(e)}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

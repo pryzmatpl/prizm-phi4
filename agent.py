@@ -13,6 +13,22 @@ class Agent:
         self._agent_tools = AgentTools
         self.other_agents = {}
 
+    @staticmethod
+    def initialize_agents(agents_list: List[str]) -> List[Dict]:
+        """Initialize and cross-register agents."""
+        agents = [{"name": agent, "agent": Agent(agent)} for agent in agents_list]
+
+        # Register other agents with each agent
+        for i, agent_dict in enumerate(agents):
+            other_agents = agents[:i] + agents[i+1:]
+            for other_agent in other_agents:
+                agent_dict["agent"].register_agent(
+                    other_agent["name"],
+                    other_agent["agent"]
+                )
+
+        return agents
+
     def register_agent(self, other_agent_name: str, other_agent: "Agent") -> None:
         """
         Register another agent to enable inter-agent communication.
@@ -35,7 +51,7 @@ class Agent:
         except Exception as e:
             raise ValueError(f'Error loading agent file {agent_file["name"]}: {str(e)}')
 
-    def handle_agent_request(self, input_text: str) -> str:
+    def handle_agent_request(self, input_text: str, pipeline) -> str:
         """
         Process AGENT requests and simulate the corresponding actions.
         """
