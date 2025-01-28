@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, Union
 import torch
 from transformers import Pipeline as TransformersPipeline
 from agent import Agent
+from memory_manager import MemoryManager
 
 class PipelineProcessor:
     def __init__(
@@ -26,6 +27,7 @@ class PipelineProcessor:
         self.top_p = top_p
         self.top_k = top_k
         self.conversation_history: List[Dict[str, str]] = []
+        self.memory_manager = MemoryManager()
 
     def _format_prompt(self, prompt: str, system_prompt: Optional[str] = None) -> str:
         """
@@ -128,6 +130,7 @@ class PipelineProcessor:
             Generated response or agent action result
         """
         try:
+            self.memory_manager.clear_memory()
             # Format input with conversation history
             logging.debug(f"Input: {input_text}, prompt: {system_prompt}")
             formatted_input = self._format_prompt(input_text, system_prompt)
@@ -150,6 +153,11 @@ class PipelineProcessor:
 
             return response
 
+        except RuntimeError as e:
+            if "out of memory" in str(e):
+                self.memory_manager.clear_memory()
+                # Could retry with smaller context/generation limits
+                return "Memory error occurred. Try with shorter input."
         except Exception as e:
             error_msg = f"Pipeline processing error: {str(e)}"
             self.update_conversation("system", error_msg)
