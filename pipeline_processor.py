@@ -49,7 +49,6 @@ class PipelineProcessor:
         """
         try:
             generation_config = {
-                "max_length": self.max_length,
                 "temperature": self.temperature,
                 "top_p": self.top_p,
                 "top_k": self.top_k,
