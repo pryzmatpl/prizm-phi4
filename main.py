@@ -2,9 +2,6 @@ import argparse
 import os
 import sys
 import logging
-
-from transformers import BitsAndBytesConfig
-
 from pipeline import Pipeline
 from pipeline_processor import PipelineProcessor
 from agent import Agent
@@ -79,7 +76,6 @@ def main():
         # Create pipeline processor with custom parameters
         processor = PipelineProcessor(
             pipeline=base_pipeline,
-            max_length=20480,
             temperature=0.7,
             top_p=0.9,
             top_k=50
