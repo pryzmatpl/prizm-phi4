@@ -8,7 +8,6 @@ class PipelineProcessor:
     def __init__(
             self,
             pipeline: TransformersPipeline,
-            max_length: int = 2048,
             temperature: float = 0.7,
             top_p: float = 0.9,
             top_k: int = 50
@@ -18,13 +17,11 @@ class PipelineProcessor:
 
         Args:
             pipeline: Initialized transformers pipeline
-            max_length: Maximum length of generated text
             temperature: Sampling temperature for generation
             top_p: Top-p sampling parameter
             top_k: Top-k sampling parameter
         """
         self.pipeline = pipeline
-        self.max_length = max_length
         self.temperature = temperature
         self.top_p = top_p
         self.top_k = top_k
