@@ -13,7 +13,7 @@ class Interface:
         interface_prompt = []
         for agent in agents:
             try:
-                interface_prompt.append(Agent.load_agent(agent))
+                interface_prompt.append(Agent.load_agent_config_file(agent))
             except ValueError as e:
                 print(str(e), file=sys.stderr)
                 continue
@@ -36,6 +36,7 @@ class Interface:
 
             try:
                 # First, have the supervisor process the input
+                logging.debug(agents)
                 supervisor_messages = Interface.prepare_model_input(line, agents)
                 supervisor_response = processor.process(
                     input_text=supervisor_messages,
@@ -60,6 +61,9 @@ class Interface:
 
                         target_agent_name = parts[1].strip()
                         agent_command = parts[2].strip()
+
+                        logging.debug(f"Target agent name: {target_agent_name}")
+                        logging.debug(f"Target agent cmd: {agent_command}")
 
                         # Find the target agent
                         target_agent = next(

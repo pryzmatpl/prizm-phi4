@@ -1,8 +1,8 @@
+import logging
 from typing import Dict, List, Optional, Union
 import torch
 from transformers import Pipeline as TransformersPipeline
-import json
-import os
+from agent import Agent
 
 class PipelineProcessor:
     def __init__(
@@ -109,7 +109,7 @@ class PipelineProcessor:
     def process(
             self,
             input_text: str,
-            agent: 'Agent',
+            agent: Agent,
             system_prompt: Optional[str] = None
     ) -> str:
         """
@@ -130,6 +130,8 @@ class PipelineProcessor:
             # Generate initial response
             response = self._generate_response(formatted_input)
 
+            logging.debug(f"Initial response: {response}")
+
             # Update conversation history
             self.update_conversation("user", input_text)
             self.update_conversation("assistant", response)
@@ -137,6 +139,7 @@ class PipelineProcessor:
             # Check if response contains agent action
             if response.startswith("AGENT:"):
                 agent_result = agent.handle_agent_request(response, self)
+                logging.debug(f"Agent response: {response}")
                 self.update_conversation("agent", agent_result)
                 return agent_result
 

@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from typing import Dict, List
 from agent_tools import AgentTools
@@ -40,7 +41,7 @@ class Agent:
         self.other_agents[other_agent_name] = other_agent
 
     @staticmethod
-    def load_agent(agent_file: Dict) -> Dict[str, str]:
+    def load_agent_config_file(agent_file: Dict) -> Dict[str, str]:
         """
         Load system prompt from agents/[filename].json.
         """
@@ -51,10 +52,12 @@ class Agent:
         except Exception as e:
             raise ValueError(f'Error loading agent file {agent_file["name"]}: {str(e)}')
 
-    def handle_agent_request(self, input_text: str, pipeline) -> str:
+    def handle_agent_request(self, input_text: str) -> str:
         """
         Process AGENT requests and simulate the corresponding actions.
         """
+
+        logging.debug(f"Text input for agent: {input_text}")
         try:
             if input_text.startswith("AGENT: FILESEARCHRESULTS"):
                 file_data = input_text.split("[", 1)[1].rsplit("]", 1)[0]
@@ -83,4 +86,5 @@ class Agent:
 
         except Exception as e:
             return f"AGENT PROMPT INVALID: {str(e)}"
+
         return "AGENT PROMPT INVALID"
