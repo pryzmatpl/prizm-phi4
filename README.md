@@ -10,26 +10,26 @@ Advanced AI agent system leveraging Microsoft's Phi-4 model for intelligent, con
 - Safety-aligned model interactions
 
 ## Prerequisites
-- Python 3.8+
-- ROCm-compatible environment
-- H100 or equivalent GPU recommended
+- Python 3.10 (based on conda env in AMD's **rocm/pytorch:rocm6.1.3_ubuntu22.04_py3.10_pytorch_release-2.1.2**)
+- ROCm-compatible environment (Tested on 7900 XTX / gfx1100)
 
 ## Setup
 1. Install dependencies:
    ```bash
-   pip install transformers accelerate
+   pip install transformers accelerate bitsandbytes
    ```
 
 2. Run script:
    ```bash
-   ./run.sh [agent_names]
+   ./run.sh [model_path] [agent_name1] [agent_name2] ...
    ```
 
 ## Usage
 - Standard input: Conversational queries
-- Agent requests: Prefix with `AGENT:`
+- Agent requests: Prefixed by supervisor with `AGENT:`
+- For testing, may aim to start messages with `AGENT:`
 
-## Model Characteristics
+## Model Characteristics (just phi4)
 - 14B parameters
 - 16K token context
 - English-focused reasoning
