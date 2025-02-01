@@ -21,12 +21,12 @@ class Pipeline:
             )
 
             memory_config = {
-                0: "24GB",  # GPU 0
+                0: "22GB",  # GPU 0
                 "cpu": "64GB"  # CPU memory
             }
 
             model_kwargs = {
-                "torch_dtype": "auto",
+                "torch_dtype": torch.float16,
                 "device_map": device_map,
                 "local_files_only": True,
                 "max_memory": memory_config

@@ -52,7 +52,7 @@ class PipelineProcessor:
         try:
             generation_config = {
                 "max_new_tokens": 4096,  # Limit output size
-                "max_length": 4096,      # Limit total sequence length
+                "truncation": True,
                 "temperature": self.temperature,
                 "top_p": self.top_p,
                 "top_k": self.top_k,
@@ -62,7 +62,6 @@ class PipelineProcessor:
 
             outputs = self.pipeline(
                 prompt,
-                return_full_text=True,
                 **generation_config
             )
 
