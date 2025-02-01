@@ -1,2 +1,2 @@
 #!/bin/bash
-./init/initialize-torch.sh karen
+./init/initialize-torch.sh karen agent

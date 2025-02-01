@@ -17,27 +17,31 @@ class Pipeline:
             print(f'Device name [0]: {torch.cuda.get_device_name(0)}', file=sys.stderr)
 
             tokenizer = AutoTokenizer.from_pretrained(
-                model_path,
-                trust_remote_code=True,
-                local_files_only=True
+                model_path
             )
+
+            memory_config = {
+                0: "24GB",  # GPU 0
+                "cpu": "64GB"  # CPU memory
+            }
 
             model_kwargs = {
                 "torch_dtype": "auto",
                 "device_map": device_map,
-                "trust_remote_code": True,
                 "local_files_only": True,
+                "max_memory": memory_config
             }
 
-            config = BitsAndBytesConfig(load_in_8bit=load_in_8bit)
+            config: BitsAndBytesConfig = BitsAndBytesConfig(load_in_8bit=load_in_8bit)
             model = AutoModelForCausalLM.from_pretrained(model_path, **model_kwargs)
+
 
             pipeline = transformers.pipeline(
                 "text-generation",
                 model=model,
                 tokenizer=tokenizer,
-                device_map=device_map,
-                config=config
+                config=config,
+                model_kwargs=model_kwargs
             )
 
             print(f"Successfully loaded model from {model_path}", file=sys.stderr)

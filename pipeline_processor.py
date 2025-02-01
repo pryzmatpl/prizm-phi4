@@ -146,7 +146,7 @@ class PipelineProcessor:
 
             # Check if response contains agent action
             if response.startswith("AGENT:"):
-                agent_result = agent.handle_agent_request(response, self)
+                agent_result = agent.handle_agent_request(response)
                 logging.debug(f"Agent response: {response}")
                 self.update_conversation("agent", agent_result)
                 return agent_result
