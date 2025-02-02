@@ -37,7 +37,7 @@ class PipelineProcessor:
         if system_prompt:
             formatted_prompt += f"{system_prompt}\n\n"
 
-        for message in self.conversation_history[-5:]:  # Keep last 5 messages for context
+        for message in self.conversation_history[-3:]:  # Keep last 5 messages for context
             role = message["role"]
             content = message["content"]
             formatted_prompt += f"{role}: {content}\n"
@@ -65,7 +65,7 @@ class PipelineProcessor:
                 **generation_config
             )
 
-            logging.debug(f"Raw outputs: {outputs}")
+            logging.debug(f"++++++\n\nRaw outputs: \n\n {outputs} \n\n")
 
             return outputs[0]["generated_text"].strip()
 
@@ -128,6 +128,9 @@ class PipelineProcessor:
         Returns:
             Generated response or agent action result
         """
+        logging.debug("Input:" + input_text)
+        logging.debug(' '.join(agent))
+        logging.debug("System prompt:" + ' '.join(system_prompt))
         try:
             self.memory_manager.clear_memory()
             # Format input with conversation history
@@ -140,14 +143,15 @@ class PipelineProcessor:
             logging.debug(f"Initial response: {response}")
 
             # Update conversation history
-            self.update_conversation("user", input_text)
-            self.update_conversation("assistant", response)
+            self.update_conversation("user", input_text) #user request
+            # Update to store the response from the model
+            self.update_conversation(agent.agent_name, response)
 
             # Check if response contains agent action
             if response.startswith("AGENT:"):
                 agent_result = agent.handle_agent_request(response)
                 logging.debug(f"Agent response: {response}")
-                self.update_conversation("agent", agent_result)
+                self.update_conversation(agent.agent_name, agent_result)
                 return agent_result
 
             return response

@@ -36,8 +36,8 @@ class Interface:
 
             try:
                 # First, have the supervisor process the input
-                logging.debug("HERE BE AGENTS:")
-                logging.debug(agents)
+                print("HERE BE AGENTS:")
+                print(agents)
                 supervisor_messages = Interface.prepare_model_input(line, agents)
                 supervisor_response = processor.process(
                     input_text=supervisor_messages,

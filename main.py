@@ -6,6 +6,12 @@ from pipeline import Pipeline
 from pipeline_processor import PipelineProcessor
 from agent import Agent
 from interface import Interface
+from dotenv import load_dotenv
+import debugpy
+
+load_dotenv()
+
+debugpy.listen(("0.0.0.0", 5678))
 
 def parse_arguments() -> argparse.Namespace:
     """Parse command line arguments with support for positional agent names."""

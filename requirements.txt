@@ -145,3 +145,5 @@ xdoctest==1.1.0
 yarl==1.18.3
 z3-solver==4.12.2.0
 zipp==3.19.2
+debugpy==1.8.12
+dotenv==1.0.1

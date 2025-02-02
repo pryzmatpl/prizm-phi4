@@ -85,6 +85,6 @@ class Agent:
                     return f"Error processing TALKTO request: {str(e)}"
 
         except Exception as e:
-            return f"AGENT PROMPT INVALID: {str(e)}"
+            return f"AGENT PROMPT INVALID EXCEPTED: {str(e)}"
 
-        return "AGENT PROMPT INVALID"
+        return "AGENT PROMPT INVALID FOR OTHER REASONS"
