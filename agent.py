@@ -41,16 +41,16 @@ class Agent:
         self.other_agents[other_agent_name] = other_agent
 
     @staticmethod
-    def load_agent_config_file(agent_file: Dict) -> Dict[str, str]:
+    def load_agent_config_file(agent_file: str) -> Dict[str, str]:
         """
         Load system prompt from agents/[filename].json.
         """
         try:
-            file_path = os.path.normpath(f'agents/{agent_file["name"]}.json')
+            file_path = os.path.normpath(f'agents/{agent_file}.json')
             with open(file_path, "r", encoding="utf-8") as file:
                 return json.load(file)
         except Exception as e:
-            raise ValueError(f'Error loading agent file {agent_file["name"]}: {str(e)}')
+            raise ValueError(f'Error loading agent file {agent_file}: {str(e)}')
 
     def handle_agent_request(self, input_text: str) -> str:
         """

@@ -6,14 +6,14 @@ from pipeline_processor import PipelineProcessor
 
 class Interface:
     @staticmethod
-    def prepare_model_input(input_text: str, agents: List[str]) -> List[Dict[str, str]]:
+    def prepare_model_input(input_text: str, agents: List[Dict[str, Agent]]) -> List[Dict[str, str]]:
         """
         Process input agents prompts and return messages list.
         """
         interface_prompt = []
         for agent in agents:
             try:
-                interface_prompt.append(Agent.load_agent_config_file(agent))
+                interface_prompt.append(Agent.load_agent_config_file(agent["name"])) #type:ignore
             except ValueError as e:
                 print(str(e), file=sys.stderr)
                 continue
@@ -36,12 +36,10 @@ class Interface:
 
             try:
                 # First, have the supervisor process the input
-                print("HERE BE AGENTS:")
-                print(agents)
                 supervisor_messages = Interface.prepare_model_input(line, agents)
                 supervisor_response = processor.process(
-                    input_text=supervisor_messages,
-                    agent=supervisor_agent
+                    _input=supervisor_messages,
+                    supervisor_agent=supervisor_agent
                 )
 
                 if not supervisor_response:
@@ -86,12 +84,14 @@ class Interface:
 
                 # Final processing of all responses by supervisor
                 if responses:
+                    print(responses)
+                    post_agent_response = Interface.prepare_model_input(
+                        "\n".join(responses),
+                        agents
+                    )
                     final_response = processor.process(
-                        input_text=Interface.prepare_model_input(
-                            "\n".join(responses),
-                            agents
-                        ),
-                        agent=supervisor_agent
+                        _input=post_agent_response,
+                        supervisor_agent=supervisor_agent
                     )
                     print(final_response.strip() if final_response else "No final response generated.")
                 else:

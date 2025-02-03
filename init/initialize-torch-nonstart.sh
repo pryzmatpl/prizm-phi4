@@ -12,6 +12,7 @@ docker run -it \
   bash -c "
     cd /app &&
     pip install transformers accelerate bitsandbytes debugpy python-dotenv &&
-    export TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1
+    export TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1 &&
+    exec bash
   "
   

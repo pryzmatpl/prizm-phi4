@@ -29,20 +29,24 @@ class PipelineProcessor:
         self.conversation_history: List[Dict[str, str]] = []
         self.memory_manager = MemoryManager()
 
-    def _format_prompt(self, prompt: str, system_prompt: Optional[str] = None) -> str:
+    def _format_prompt(self, _input: List[Dict[str,str]]) -> str:
         """
         Format the prompt with optional system prompt and conversation history.
         """
         formatted_prompt = ""
-        if system_prompt:
-            formatted_prompt += f"{system_prompt}\n\n"
 
-        for message in self.conversation_history[-3:]:  # Keep last 5 messages for context
+        for message in _input:
             role = message["role"]
             content = message["content"]
             formatted_prompt += f"{role}: {content}\n"
 
-        formatted_prompt += f"User: {prompt}\nAssistant:"
+        # Context expansion here
+        # for message in self.conversation_history[-3:]:  # Keep last 3 messages for context
+        #     role = message["role"]
+        #     content = message["content"]
+        #     formatted_prompt += f"{role}: {content}\n"
+
+
         return formatted_prompt
 
     def _generate_response(self, prompt: str) -> str:
@@ -113,45 +117,29 @@ class PipelineProcessor:
 
     def process(
             self,
-            input_text: str,
-            agent: Agent,
-            system_prompt: Optional[str] = None
+            _input: List[Dict[str,str]],
+            supervisor_agent: Agent
     ) -> str:
         """
         Process input through the pipeline and agent.
 
         Args:
-            input_text: User input text
-            agent: Agent instance to handle requests
-            system_prompt: Optional system prompt to prepend
-
+            _input: User input + system prompt dict
+            supervisor_agent: Main agent (ie Karen or Linus)
         Returns:
             Generated response or agent action result
         """
-        logging.debug("Input:" + input_text)
-        logging.debug(' '.join(agent))
-        logging.debug("System prompt:" + ' '.join(system_prompt))
         try:
             self.memory_manager.clear_memory()
-            # Format input with conversation history
-            logging.debug(f"Input: {input_text}, prompt: {system_prompt}")
-            formatted_input = self._format_prompt(input_text, system_prompt)
 
-            # Generate initial response
+            formatted_input = self._format_prompt(_input)
             response = self._generate_response(formatted_input)
+            self.update_conversation("agent", response)
 
-            logging.debug(f"Initial response: {response}")
-
-            # Update conversation history
-            self.update_conversation("user", input_text) #user request
-            # Update to store the response from the model
-            self.update_conversation(agent.agent_name, response)
-
-            # Check if response contains agent action
             if response.startswith("AGENT:"):
-                agent_result = agent.handle_agent_request(response)
+                agent_result = supervisor_agent.handle_agent_request(response)
                 logging.debug(f"Agent response: {response}")
-                self.update_conversation(agent.agent_name, agent_result)
+                self.update_conversation(supervisor_agent.agent_name, agent_result)
                 return agent_result
 
             return response
