@@ -104,5 +104,5 @@ class Agent:
             logging.error(f"Exception in agent request handling: {str(e)}")
             return f"AGENT PROMPT INVALID EXCEPTION: {str(e)}"
 
-    return "AGENT PROMPT INVALID FOR OTHER REASONS"
+        return "AGENT PROMPT INVALID FOR OTHER REASONS"
 

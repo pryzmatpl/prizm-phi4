@@ -11,7 +11,7 @@ docker run -it \
   rocm/pytorch:rocm6.1.3_ubuntu22.04_py3.10_pytorch_release-2.1.2 \
   bash -c "
     cd /app &&
-    pip install transformers accelerate bitsandbytes debugpy python-dotenv &&
+    pip install requests bs4 transformers accelerate bitsandbytes debugpy python-dotenv &&
     export TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1 &&
     exec bash
   "
