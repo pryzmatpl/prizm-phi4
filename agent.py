@@ -59,6 +59,10 @@ class Agent:
         logging.debug(f"Text input for agent: {input_text}")
 
         try:
+            if "You are Agent" in input_text:
+                # Prevent Karen from echoing system rules
+                return "I’m here to help! What do you need?"
+
             if input_text.startswith("AGENT: FILESEARCHRESULTS"):
                 # Extract file names
                 try:
