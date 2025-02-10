@@ -20,7 +20,7 @@ class Interface:
                 print(str(e), file=sys.stderr)
                 continue
 
-        #always load the OS agent 
+        #always load the OS agent
         interface_prompt = [Agent.load_agent_config_file('agent'), {"role": "user", "content": input_text.strip()}]
 
         return interface_prompt

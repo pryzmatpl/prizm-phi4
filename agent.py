@@ -56,21 +56,29 @@ class Agent:
         """
         Process AGENT requests and simulate the corresponding actions.
         """
-
         logging.debug(f"Text input for agent: {input_text}")
+
         try:
             if input_text.startswith("AGENT: FILESEARCHRESULTS"):
-                file_data = input_text.split("[", 1)[1].rsplit("]", 1)[0]
-                file_list = file_data.split(",")
-                return self._agent_tools.search_files(file_list)
+                # Extract file names
+                try:
+                    file_data = input_text.split("[", 1)[1].rsplit("]", 1)[0]
+                    file_list = file_data.split(",")
+                    return self._agent_tools.search_files(file_list)
+                except Exception as e:
+                    return f"Error processing FILESEARCHRESULTS: {str(e)}"
 
             elif input_text.startswith("AGENT: FILECONTENTSEARCHRESULTS"):
-                search_data = input_text.split("[", 1)[1].rsplit("]", 1)[0]
-                search_phrase, *file_list = search_data.split(",")
-                return self._agent_tools.search_file_content(search_phrase.strip(), file_list)
+                # Extract search phrase and file names
+                try:
+                    search_data = input_text.split("[", 1)[1].rsplit("]", 1)[0]
+                    search_phrase, *file_list = search_data.split(",")
+                    return self._agent_tools.search_file_content(search_phrase.strip(), file_list)
+                except Exception as e:
+                    return f"Error processing FILECONTENTSEARCHRESULTS: {str(e)}"
 
             elif input_text.startswith("AGENT: TALKTO"):
-                # Parse the target agent and message
+                # Extract target agent and message
                 try:
                     target_agent_name, message = input_text.split("[", 1)[1].rsplit("]", 1)[0].split(",", 1)
                     target_agent_name = target_agent_name.strip()
@@ -84,7 +92,17 @@ class Agent:
                 except Exception as e:
                     return f"Error processing TALKTO request: {str(e)}"
 
-        except Exception as e:
-            return f"AGENT PROMPT INVALID EXCEPTED: {str(e)}"
+            elif input_text.startswith("AGENT: WEBSEARCH"):
+                # Extract search query
+                try:
+                    query = input_text.split("[", 1)[1].rsplit("]", 1)[0].strip()
+                    return self._agent_tools.search_web(query)
+                except Exception as e:
+                    return f"Error processing WEBSEARCH request: {str(e)}"
 
-        return "AGENT PROMPT INVALID FOR OTHER REASONS"
+        except Exception as e:
+            logging.error(f"Exception in agent request handling: {str(e)}")
+            return f"AGENT PROMPT INVALID EXCEPTION: {str(e)}"
+
+    return "AGENT PROMPT INVALID FOR OTHER REASONS"
+
