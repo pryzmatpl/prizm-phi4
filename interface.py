@@ -10,14 +10,19 @@ class Interface:
         """
         Process input agents prompts and return messages list.
         """
-        interface_prompt = []
+        interface_prompt = [Agent.load_agent_config_file('system')]
+        #always load the system prompt
+
         for agent in agents:
             try:
                 interface_prompt.append(Agent.load_agent_config_file(agent["name"])) #type:ignore
             except ValueError as e:
                 print(str(e), file=sys.stderr)
                 continue
-        interface_prompt.append({"role": "user", "content": input_text.strip()})
+
+        #always load the OS agent 
+        interface_prompt = [Agent.load_agent_config_file('agent'), {"role": "user", "content": input_text.strip()}]
+
         return interface_prompt
 
     @staticmethod
