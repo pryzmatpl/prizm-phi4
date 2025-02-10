@@ -57,6 +57,7 @@ class Agent:
         Process AGENT requests and simulate the corresponding actions.
         """
         logging.debug(f"Text input for agent: {input_text}")
+        print("Agent working...")
 
         try:
             if "You are Agent" in input_text:
