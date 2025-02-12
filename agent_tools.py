@@ -18,7 +18,7 @@ class AgentTools:
                 results.append(f"Found: {file_path}")
             else:
                 results.append(f"Not found: {file_path}")
-        return "\n".join(results)
+        return "AGENTRESP SEARCH, ".join(results)
 
     @classmethod
     def search_file_content(cls, search_phrase: str, file_list: List[str]) -> str:
@@ -40,7 +40,7 @@ class AgentTools:
                     results.append(f"Error reading {file_path}: {str(e)}")
             else:
                 results.append(f"File not found: {file_path}")
-        return "\n".join(results)
+        return "AGENTRESP CONTENTSEARCH, ".join(results)
 
     @classmethod
     def search_web(cls, query: str, engine: str = "duckduckgo") -> str:
@@ -74,7 +74,7 @@ class AgentTools:
                         if "Text" in result and "FirstURL" in result:
                             results.append(f"{result['Text']} - {result['FirstURL']}")
 
-                    return "\n".join(results) if results else f"No results found on DuckDuckGo for: {query}"
+                    return "AGENTRESP WEBSEARCH, ".join(results) if results else f"No results found on DuckDuckGo for: {query}"
 
             elif engine.lower() == "bing":
                 # Bing Search API (Free Tier via Microsoft)
@@ -98,7 +98,7 @@ class AgentTools:
                         link = result.find("a")["href"] if result.find("a") else "No Link"
                         results.append(f"{title} - {link}")
 
-                    return "\n".join(results) if results else f"No results found on Bing for: {query}"
+                    return "AGENTRESP WEBSEARCH, ".join(results) if results else f"No results found on Bing for: {query}"
 
             else:
                 return "Error: Unsupported search engine. Use 'duckduckgo' or 'bing'."
