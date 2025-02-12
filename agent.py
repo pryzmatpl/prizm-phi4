@@ -64,23 +64,23 @@ class Agent:
                 # Prevent Karen from echoing system rules
                 return "I’m here to help! What do you need?"
 
-            if input_text.startswith("AGENT: FILESEARCHRESULTS"):
+            if input_text.startswith("AGENT: SEARCH"):
                 # Extract file names
                 try:
                     file_data = input_text.split("[", 1)[1].rsplit("]", 1)[0]
                     file_list = file_data.split(",")
                     return self._agent_tools.search_files(file_list)
                 except Exception as e:
-                    return f"Error processing FILESEARCHRESULTS: {str(e)}"
+                    return f"Error processing SEARCH: {str(e)}"
 
-            elif input_text.startswith("AGENT: FILECONTENTSEARCHRESULTS"):
+            elif input_text.startswith("AGENT: CONTENTSEARCH"):
                 # Extract search phrase and file names
                 try:
                     search_data = input_text.split("[", 1)[1].rsplit("]", 1)[0]
                     search_phrase, *file_list = search_data.split(",")
                     return self._agent_tools.search_file_content(search_phrase.strip(), file_list)
                 except Exception as e:
-                    return f"Error processing FILECONTENTSEARCHRESULTS: {str(e)}"
+                    return f"Error processing CONTENTSEARCH: {str(e)}"
 
             elif input_text.startswith("AGENT: TALKTO"):
                 # Extract target agent and message
