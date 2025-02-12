@@ -9,6 +9,10 @@ from interface import Interface
 from dotenv import load_dotenv
 import debugpy
 
+logging.basicConfig(filename="main.log",
+                    format='%(asctime)s %(message)s',
+                    filemode='w')
+
 load_dotenv()
 
 debugpy.listen(("0.0.0.0", 5678))

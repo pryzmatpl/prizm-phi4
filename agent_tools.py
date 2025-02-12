@@ -1,3 +1,5 @@
+import logging
+
 import bs4
 import os
 import requests
@@ -12,6 +14,7 @@ class AgentTools:
         Simulate a file search operation.
         """
         results = []
+        logging.debug(f"searching files {file_list}")
         for file in file_list:
             file_path = os.path.abspath(os.path.normpath(file.strip()))
             if os.path.exists(file_path):
@@ -26,6 +29,7 @@ class AgentTools:
         Simulate a content search operation in files.
         """
         results = []
+        logging.debug(f"searching {search_phrase} in {file_list}")
         for file in file_list:
             file_path = os.path.abspath(os.path.normpath(file.strip()))
             if os.path.exists(file_path):
@@ -54,6 +58,7 @@ class AgentTools:
         Returns:
             str: A list of search results with titles and links or an error message.
         """
+        logging.debug(f"searching {query} and {engine}")
         try:
             if engine.lower() == "duckduckgo":
                 # DuckDuckGo API
