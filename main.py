@@ -76,7 +76,7 @@ def main():
     _interface = Interface()
 
     # Initialize agents
-    agents = Agent.initialize_agents(args.agents)
+    agents = Agent(agent_config=agents_list[0])
 
     try:
         # Initialize the transformer pipeline
