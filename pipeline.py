@@ -2,8 +2,11 @@ import transformers
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import torch
 import sys
+import logging
 
 class Pipeline:
+    """Class to initialize and manage a transformers text-generation pipeline."""
+
     @staticmethod
     def initialize_pipeline(
         model_path: str = "./",
@@ -12,9 +15,19 @@ class Pipeline:
     ) -> transformers.Pipeline:
         """
         Initialize the text generation pipeline with a locally sharded model.
+        Args:
+            model_path (str): Path to the model directory
+            load_in_8bit (bool): Whether to load in 8-bit precision
+            device_map (str): Device mapping strategy for model
+
+        Returns:
+            transformers.Pipeline: Initialized pipeline object
         """
         try:
-            print(f'Device name [0]: {torch.cuda.get_device_name(0)}', file=sys.stderr)
+            if torch.cuda.is_available():
+                logging.info(f'Device name [0]: {torch.cuda.get_device_name(0)}')
+            else:
+                logging.info("No CUDA device available, using CPU.")
 
             tokenizer = AutoTokenizer.from_pretrained(
                 model_path
@@ -32,21 +45,19 @@ class Pipeline:
                 "max_memory": memory_config
             }
 
-            config: BitsAndBytesConfig = BitsAndBytesConfig(load_in_8bit=load_in_8bit)
-            model = AutoModelForCausalLM.from_pretrained(model_path, **model_kwargs)
-
-
+            model = AutoModelForCausalLM.from_pretrained(model_path, quantization_config=BitsAndBytesConfig(load_in_8bit=load_in_8bit), **model_kwargs)
             pipeline = transformers.pipeline(
                 "text-generation",
                 model=model,
                 tokenizer=tokenizer,
-                config=config,
                 model_kwargs=model_kwargs
             )
 
             print(f"Successfully loaded model from {model_path}", file=sys.stderr)
+            logging.info(f"Successfully loaded model from {model_path}")
             return pipeline
 
         except Exception as e:
             print(f"Error loading model from {model_path}: {str(e)}", file=sys.stderr)
+            logging.error(f"Error loading model from {model_path}: {str(e)}")
             raise

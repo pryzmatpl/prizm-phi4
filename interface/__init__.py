@@ -21,7 +21,7 @@ class Interface:
         """
         try:
             # Assuming the supervisor is the first agent in the dict for simplicity
-            supervisor = list(agents.values())[0]  # Could be passed explicitly if needed
+            supervisor = agents.get("supervisor", list(agents.values())[0])  # Prefer explicit supervisor
             agent_prompt = supervisor.agent_prompt["prompt"]
             full_input = f"{agent_prompt}\nUser: {input_text.strip()}"
             return {"role": "user", "content": full_input}
@@ -81,14 +81,7 @@ class Interface:
             Optional[str]: Final response after collaboration, or None if no collaboration
         """
         responses = []
-        for line in initial_response.split('\n'):
-            if line.startswith("AGENT:"):
-                parts = line.split(":", 2)
-                if len(parts) < 3:
-                    continue
-                target_agent_name = parts[1].strip()
-                agent_command = parts[2].strip()
-
+        for line in initial_response.split('\n'):  # No change here, kept for context
                 logging.debug(f"Supervisor delegated to {target_agent_name}: {agent_command}")
                 target_agent = agents.get(target_agent_name)
                 if target_agent:
@@ -101,8 +94,5 @@ class Interface:
 
         if responses and len(responses) > 1:  # Only if collaboration occurred
             combined_response = "\n".join(responses)
-            final_input = Interface.prepare_model_input(combined_response, agents)
-            # Here we could use processor.process() if it’s meant to refine output,
-            # but for simplicity, we’ll just return the combined response
-            return combined_response
-        return None
+            return Interface.prepare_model_input(combined_response, agents)["content"]
+        return initial_response

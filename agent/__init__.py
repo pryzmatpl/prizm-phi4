@@ -18,6 +18,8 @@ class Agent:
         self.base_directory = os.path.abspath(base_directory)
         self.search_results = {}  # Cache for file search results
         self.other_agents = {}
+        self.processor = None  # Will be set by main.py
+
         self.agent_prompt = self.load_agent_config_file(agent_config) if agent_config else {
             "prompt": "I am a general-purpose agent. How can I assist you?",
             "capabilities": ["file_search", "content_search", "web_search"]
@@ -86,10 +88,17 @@ class Agent:
             operation_result = self.process_operation(operation, context or user_prompt)
             return f"{self.agent_prompt['prompt']}\nOperation result: {operation_result}"
         else:
-            # No specific operation detected, return generic response
-            return f"{self.agent_prompt['prompt']}\nI can help with file search, content search, or web search. What would you like to do?"
+            if self.processor:
+                # Use PipelineProcessor for generic responses
+                input_message = {"role": "user", "content": f"{self.agent_prompt['prompt']}\n{user_prompt}"}
+                response = self.processor.process(_input=[input_message])
+                return response.strip() if response else "No response generated."
+            else:
+                # Fallback if no processor is set
+                return f"{self.agent_prompt['prompt']}\nI can help with file search, content search, or web search. What would you like to do?"
 
-    # Existing methods (unchanged but included for completeness)
+
+# Existing methods (unchanged but included for completeness)
     def search_directory(self, directory: str = None, file_extensions: List[str] = None) -> Dict[str, str]:
         search_dir = os.path.abspath(directory) if directory else self.base_directory
         if not os.path.exists(search_dir):
