@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 import torch
 from transformers import Pipeline as TransformersPipeline
 from agent import Agent

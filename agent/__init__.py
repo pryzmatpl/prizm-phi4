@@ -23,10 +23,11 @@ class Agent:
             "capabilities": ["file_search", "content_search", "web_search"]
         }
 
-    def load_agent_config_file(self, agent_file: str) -> Dict[str, str]:
+    @staticmethod
+    def load_agent_config_file(agent_file: str) -> Dict[str, str]:
         """Load system prompt and capabilities from agents/[filename].json."""
         try:
-            file_path = os.path.normpath(f'agents/{agent_file}.json')
+            file_path = os.path.normpath(f'agent/{agent_file}.json')
             with open(file_path, "r", encoding="utf-8") as file:
                 config = json.load(file)
                 if "prompt" not in config or "capabilities" not in config:
@@ -40,7 +41,7 @@ class Agent:
         self.other_agents[other_agent_name] = other_agent
 
     @staticmethod
-    def analyze_prompt(self, user_prompt: str) -> Optional[str]:
+    def analyze_prompt(user_prompt: str) -> Optional[str]:
         """Analyze user prompt to determine intended operation."""
         patterns = {
             "file_search": r"(search|find|look in|explore)\s+(directory|files|folder)",
@@ -77,7 +78,7 @@ class Agent:
         2. Execute operation if detected
         3. Return results or generic response
         """
-        operation, context = self.analyze_prompt(user_prompt)
+        operation, context = self.analyze_prompt(user_prompt=user_prompt)
 
         if operation:
             # Internal response directs the operation
