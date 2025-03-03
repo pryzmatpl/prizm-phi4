@@ -2,89 +2,92 @@ import argparse
 import os
 import sys
 import logging
-from pipeline import Pipeline
-from pipeline_processor import PipelineProcessor
+from pipeline import Pipeline  # Assuming this handles model loading
+from interface import PipelineProcessor  # Assuming this processes model outputs
 from agent import Agent
-from interface import Interface
+from interface import Interface  # Assuming this handles user I/O
 from dotenv import load_dotenv
 import debugpy
 
-logging.basicConfig(filename="main.log",
-                    format='%(asctime)s %(message)s',
-                    filemode='w')
+# Configure logging
+logging.basicConfig(
+    filename="main.log",
+    format='%(asctime)s %(message)s',
+    filemode='w',
+    level=logging.INFO
+)
 
 load_dotenv()
 
+# Set up debugger
 debugpy.listen(("0.0.0.0", 5678))
 
 def parse_arguments() -> argparse.Namespace:
     """Parse command line arguments with support for positional agent names."""
     parser = argparse.ArgumentParser(
-        description="Launch an ensemble of agents and the supervisor."
+        description="Launch an ensemble of agents with a supervisor."
     )
-
-    # Make source_model optional with a default value
     parser.add_argument(
         "--model",
         type=str,
         default="phi4",
         help="Source model path (default: phi4)"
     )
-
-    # Add agents as remaining arguments
     parser.add_argument(
         "agents",
-        nargs="*",  # Allow any number of agent names
-        help="Names of agents to initialize"
+        nargs="+",  # Require at least one agent
+        help="Names of agents to initialize (first agent is supervisor)"
     )
-
-    # Parse known args to handle both script-style and direct launches
-    args, unknown = parser.parse_known_args()
-
-    # If there are unknown args, they might be agent names from script-style launch
-    if unknown:
-        args.agents.extend(unknown)
-
+    args = parser.parse_args()
     return args
 
 def main():
     """
-    Main function to process input and generate responses.
-    First agent is the main one.
+    Main function to initialize agents and process user input.
+    The first agent is the supervisor, others are available for collaboration.
     """
-    logging.basicConfig(level=logging.INFO)
     os.environ['PYTORCH_HIP_ALLOC_CONF'] = 'max_split_size_mb:512'  # Prevent fragmentation
 
     # Parse arguments
     args = parse_arguments()
+    model_path = f"./models/{args.model}"
 
-    # Check model path
-    model_path = "./models/"+args.model
     if not os.path.exists(model_path):
+        logging.error(f"Source model directory {model_path} does not exist.")
         print(f"Error: Source model directory {model_path} does not exist.")
         sys.exit(1)
 
-    # Get agent list (either from script or direct arguments)
     agents_list = args.agents
-
     if not agents_list:
-        print("Error: No agents specified")
+        logging.error("No agents specified.")
+        print("Error: No agents specified.")
         sys.exit(1)
 
-    # Initialize basic components
-    _pipeline = Pipeline()
-    _interface = Interface()
+    # Initialize components
+    pipeline = Pipeline()
+    interface = Interface()
 
-    # Initialize agents
-    agents = Agent(agent_config=agents_list[0])
+    # Initialize all agents
+    agents_dict = {}
+    for agent_name in agents_list:
+        try:
+            agents_dict[agent_name] = Agent(agent_config=agent_name)
+        except ValueError as e:
+            logging.error(f"Failed to initialize agent {agent_name}: {e}")
+            print(f"Error: Failed to initialize agent {agent_name}: {e}")
+            sys.exit(1)
+
+    # Register agents with each other
+    for name, agent in agents_dict.items():
+        for other_name, other_agent in agents_dict.items():
+            if name != other_name:
+                agent.register_agent(other_name, other_agent)
 
     try:
         # Initialize the transformer pipeline
-        base_pipeline = Pipeline.initialize_pipeline(
-            model_path=model_path
-        )
+        base_pipeline = Pipeline.initialize_pipeline(model_path=model_path)
 
-        # Create pipeline processor with custom parameters
+        # Create pipeline processor
         processor = PipelineProcessor(
             pipeline=base_pipeline,
             temperature=0.7,
@@ -92,17 +95,34 @@ def main():
             top_k=50
         )
 
-        print(f"Agents {' '.join(agents_list)} initialized. Awaiting input...")
+        supervisor_name = agents_list[0]
+        supervisor = agents_dict[supervisor_name]
 
-        supervisor = agents_list[0]
+        logging.info(f"Agents {' '.join(agents_list)} initialized. Supervisor: {supervisor_name}")
+        print(f"Agents {' '.join(agents_list)} initialized. Supervisor: {supervisor_name}")
+        print("Awaiting input...")
 
-        Interface.process_supervisor_loop(
-            processor,
-            supervisor,
-            agents
-        )
+        # Main loop to process user input
+        while True:
+            try:
+                user_input = interface.get_user_input()  # Assuming Interface has this method
+                if user_input.lower() in ["exit", "quit"]:
+                    break
+
+                # Supervisor processes the prompt
+                response = supervisor.handle_prompt(user_input)
+
+                # Output response to user
+                interface.display_response(response)  # Assuming Interface has this method
+                logging.info(f"User: {user_input}\nResponse: {response}")
+
+            except Exception as e:
+                error_msg = f"Error processing input: {str(e)}"
+                logging.error(error_msg)
+                interface.display_response(error_msg)
 
     except KeyboardInterrupt:
+        logging.info("Program terminated by user.")
         print("\nExiting...")
         sys.exit(0)
     except Exception as e:

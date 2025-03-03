@@ -1,9 +1,12 @@
 import logging
 from typing import Dict, List, Union
+import sys
 import torch
+from os.path import dirname, join, abspath
+sys.path.insert(0, abspath(join(dirname(__file__), '..')))
 from transformers import Pipeline as TransformersPipeline
 from agent import Agent
-from memory_manager import MemoryManager
+from interface.pipeline_processor.memory_manager import MemoryManager
 
 class PipelineProcessor:
     def __init__(
