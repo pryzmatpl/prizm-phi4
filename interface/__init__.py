@@ -61,6 +61,7 @@ class Interface:
             logging.error(f"Error displaying response: {str(e)}")
             print(f"Error: {str(e)}")
 
+
     @staticmethod
     def process_agent_collaboration(
             processor: PipelineProcessor,
@@ -78,10 +79,13 @@ class Interface:
             initial_response (str): The initial response from handle_prompt
 
         Returns:
-            Optional[str]: Final response after collaboration, or None if no collaboration
+            Optional[str]: Final response after collaboration, or the initial_response if no collaboration occurred.
         """
         responses = []
-        for line in initial_response.split('\n'):  # No change here, kept for context
+        for line in initial_response.split('\n'):  # Process each line separately
+            if ':' in line:
+                # Split the line into target agent name and command
+                target_agent_name, agent_command = map(str.strip, line.split(":", 1))
                 logging.debug(f"Supervisor delegated to {target_agent_name}: {agent_command}")
                 target_agent = agents.get(target_agent_name)
                 if target_agent:
@@ -89,6 +93,10 @@ class Interface:
                     agent_response = target_agent.handle_prompt(agent_command)
                     if agent_response:
                         responses.append(f"{target_agent_name}: {agent_response.strip()}")
+                    else:
+                        responses.append(line)
+                else:
+                    responses.append(line)
             else:
                 responses.append(line)
 
@@ -96,3 +104,4 @@ class Interface:
             combined_response = "\n".join(responses)
             return Interface.prepare_model_input(combined_response, agents)["content"]
         return initial_response
+

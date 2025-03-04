@@ -10,14 +10,14 @@ class Pipeline:
     @staticmethod
     def initialize_pipeline(
         model_path: str = "./",
-        load_in_8bit: bool = True,
+        load_in_4bit: bool = True,
         device_map: str = "auto",
     ) -> transformers.Pipeline:
         """
         Initialize the text generation pipeline with a locally sharded model.
         Args:
             model_path (str): Path to the model directory
-            load_in_8bit (bool): Whether to load in 8-bit precision
+            load_in_4bit (bool): Whether to load in 4-bit precision
             device_map (str): Device mapping strategy for model
 
         Returns:
@@ -45,7 +45,7 @@ class Pipeline:
                 "max_memory": memory_config
             }
 
-            model = AutoModelForCausalLM.from_pretrained(model_path, quantization_config=BitsAndBytesConfig(load_in_8bit=load_in_8bit), **model_kwargs)
+            model = AutoModelForCausalLM.from_pretrained(model_path, quantization_config=BitsAndBytesConfig(load_in_4bit=load_in_4bit), **model_kwargs)
             pipeline = transformers.pipeline(
                 "text-generation",
                 model=model,
