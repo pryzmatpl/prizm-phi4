@@ -1,2 +1,2 @@
 #!/bin/bash
-./init/initialize-torch.sh linus agent
+./init/initialize-torch.sh linus
