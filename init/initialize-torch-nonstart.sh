@@ -6,6 +6,7 @@ docker run -it \
   --device=/dev/dri \
   --group-add video \
   --ipc=host \
+  --network=host \
   --shm-size 32G \
   -v "$(pwd)":/app \
   rocm/pytorch:rocm6.1.3_ubuntu22.04_py3.10_pytorch_release-2.1.2 \
