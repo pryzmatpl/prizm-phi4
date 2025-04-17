@@ -3,4 +3,5 @@ venv312
 target/*
 pdfsearch/target
 __pychache__/*
-*target*
+*target**
+node_modules/*

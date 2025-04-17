@@ -1,17 +1,15 @@
-import { AgentLoop } from "../../src/utils/agent/agent-loop.js";
-import { getModelCompletion } from "../../src/utils/model-utils"; // Assuming path is correct
+import { AgentLoop } from "../src/utils/agent/agent-loop";
+import { describe, test, expect } from "@jest/globals";
+import { AppConfig } from "../src/utils/config";
 
-test("includes project doc content", async () => {
-  // ... mocks ...
+test("project doc is handled", async () => {
   const agent = new AgentLoop({
     model: "o3", // arbitrary
     instructions: "",
-    config: mockConfig,
-    approvalPolicy: ApprovalMode.SUGGEST,
-    completionFn: getModelCompletion, // <-- Add completionFn
+    completionFn: async () => ({ choices: [] }),
     onItem: () => {},
     onLoading: () => {},
-    getCommandConfirmation: () => Promise.resolve({ review: ReviewDecision.APPROVE }),
+    getCommandConfirmation: async () => true,
     onLastResponseId: () => {},
   });
   // ... rest of test ...

@@ -1,16 +1,17 @@
-import { AgentLoop } from "../../src/utils/agent/agent-loop.js";
+import { AgentLoop } from "../src/utils/agent/agent-loop";
 import { getModelCompletion } from "../../src/utils/model-utils"; // Assuming path is correct
+import { describe, test, expect } from "@jest/globals";
 
 test("cancel() aborts stream immediately", async () => {
   // ... mocks ...
   const agent = new AgentLoop({
     model: "any",
     instructions: "",
-    approvalPolicy: ApprovalMode.SUGGEST,
-    completionFn: getModelCompletion, // <-- Add completionFn
+    completionFn: async () => ({ choices: [] }), // Add dummy completion function
+    approvalPolicy: {} as any,
     onItem: () => {},
     onLoading: () => {},
-    getCommandConfirmation: () => Promise.resolve({ review: "approve" }),
+    getCommandConfirmation: async () => true,
     onLastResponseId: () => {},
     config: { model: "any", instructions: "" },
   });

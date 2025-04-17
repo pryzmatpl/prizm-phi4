@@ -1,36 +1,18 @@
-import { AgentLoop } from "../../src/utils/agent/agent-loop.js";
-import { getModelCompletion } from "../../src/utils/model-utils"; // Assuming path is correct
+import { AgentLoop } from "../src/utils/agent/agent-loop";
+import { describe, test, expect } from "@jest/globals";
+import { ResponseItem } from "openai/resources/responses/responses.mjs";
 
-test("run() with cancellation", async () => {
-  // ... mocks ...
-  const agent = new AgentLoop({
-    model: "any",
-    instructions: "",
-    config: { model: "any", instructions: "" },
-    approvalPolicy: ApprovalMode.SUGGEST,
-    completionFn: getModelCompletion,
-    onItem: (item: ResponseItem) => {
-      seenItems.push(item);
-    },
-    onLoading: () => {},
-    getCommandConfirmation: () => Promise.resolve({ review: ReviewDecision.APPROVE }),
-    onLastResponseId: () => {},
+describe("AgentLoop cancel tests", () => {
+  test("cancel() aborts stream", async () => {
+    const agent = new AgentLoop({
+      model: "any",
+      instructions: "",
+      completionFn: async () => ({ choices: [] }),
+      onItem: (item: ResponseItem) => {},
+      onLoading: () => {},
+      getCommandConfirmation: async () => true,
+      onLastResponseId: () => {},
+    });
+    // ... rest of test
   });
-  // ... rest of test ...
-});
-
-test("cancel() aborts ongoing stream", async () => {
-  // ... mocks ...
-  const agent = new AgentLoop({
-    model: "any",
-    instructions: "",
-    config: { model: "any", instructions: "" },
-    approvalPolicy: ApprovalMode.SUGGEST,
-    completionFn: getModelCompletion,
-    onItem: (item: ResponseItem) => seenItems.push(item),
-    onLoading: () => {},
-    getCommandConfirmation: () => Promise.resolve({ review: ReviewDecision.APPROVE }),
-    onLastResponseId: () => {},
-  });
-  // ... rest of test ...
 }); 

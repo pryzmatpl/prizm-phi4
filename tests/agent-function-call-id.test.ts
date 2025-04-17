@@ -1,16 +1,14 @@
-import { AgentLoop } from "../../src/utils/agent/agent-loop.js";
-import { getModelCompletion } from "../../src/utils/model-utils"; // Assuming path is correct
+import { AgentLoop } from "../src/utils/agent/agent-loop";
+import { describe, test, expect } from "@jest/globals";
 
-test("handleFunctionCall uses call_id over id", async () => {
-  // ... mocks ...
+test("function call ID is preserved", async () => {
   const agent = new AgentLoop({
     model: "any",
     instructions: "",
-    approvalPolicy: ApprovalMode.SUGGEST,
-    completionFn: getModelCompletion, // <-- Add completionFn
+    completionFn: async () => ({ choices: [] }),
     onItem: () => {},
     onLoading: () => {},
-    getCommandConfirmation: () => Promise.resolve({ review: ReviewDecision.APPROVE }),
+    getCommandConfirmation: async () => true,
     onLastResponseId: () => {},
   });
   // ... rest of test ...

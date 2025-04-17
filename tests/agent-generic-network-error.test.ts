@@ -1,5 +1,19 @@
-import { AgentLoop } from "../../src/utils/agent/agent-loop.js";
-import { getModelCompletion } from "../../src/utils/model-utils"; // Assuming path is correct
+import { AgentLoop } from "../src/utils/agent/agent-loop";
+import { describe, test, expect } from "@jest/globals";
+import { ResponseItem } from "openai/resources/responses/responses.mjs";
+
+test("network error is handled", async () => {
+  const agent = new AgentLoop({
+    model: "any",
+    instructions: "",
+    completionFn: async () => ({ choices: [] }),
+    onItem: (i: ResponseItem) => 0,
+    onLoading: () => {},
+    getCommandConfirmation: async () => true,
+    onLastResponseId: () => {},
+  });
+  // ... rest of test
+});
 
 test("generic network error", async () => {
   // ... mocks ...

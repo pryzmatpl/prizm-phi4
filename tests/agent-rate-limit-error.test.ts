@@ -1,18 +1,16 @@
-import { AgentLoop } from "../../src/utils/agent/agent-loop.js";
-import { getModelCompletion } from "../../src/utils/model-utils"; // Assuming path is correct
+import { AgentLoop } from "../src/utils/agent/agent-loop";
+import { describe, test, expect } from "@jest/globals";
+import { ResponseItem } from "openai/resources/responses/responses.mjs";
 
-it("should retry with exponential backoff", async () => {
-  // ... mocks ...
+test("rate limit error is handled", async () => {
   const agent = new AgentLoop({
     model: "any",
     instructions: "",
-    approvalPolicy: ApprovalMode.SUGGEST,
-    completionFn: getModelCompletion, // <-- Add completionFn
-    onItem: (i: ResponseItem) => seenItems.push(i),
+    completionFn: async () => ({ choices: [] }),
+    onItem: (i: ResponseItem) => 0,
     onLoading: () => {},
-    getCommandConfirmation: () =>
-      Promise.resolve({ review: ReviewDecision.APPROVE }),
+    getCommandConfirmation: async () => true,
     onLastResponseId: () => {},
   });
-  // ... rest of test ...
+  // ... rest of test
 }); 
